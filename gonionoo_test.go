@@ -147,3 +147,25 @@ func TestGetUptimeNoQuery(t *testing.T) {
 		t.Errorf("Got response, but got no relays")
 	}
 }
+
+func TestValidatMethodNoMethod(t *testing.T) {
+	err := validateMethod("")
+	if err == nil {
+		t.Errorf("validateMethod with no method didn't return an error")
+	}
+}
+
+func TestValidatMethodUnknownMethod(t *testing.T) {
+	err := validateMethod("Unknown")
+	if err == nil {
+		t.Errorf("validateMethod with an unknown method didn't return an error")
+	}
+}
+
+func TestExecuteRequestWithUnknownMethod(t *testing.T) {
+	var result = new(Uptime)
+	err := executeRequest("Unknown", nil, &result)
+	if err == nil {
+		t.Errorf("executeRequest with an unknown method didn't return an error")
+	}
+}
