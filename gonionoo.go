@@ -14,37 +14,37 @@ const (
 	// OOOURL is the OnionOO endpoint URL
 	oooURL = "https://onionoo.torproject.org/"
 	// OOOVersionMajor is the OnionOO major version
-	oooVersionMajor = 2
+	oooVersionMajor = 4
 	// OOOVersionMinor is the OnionOO minor version
-	oooVersionMinor = 6
+	oooVersionMinor = 0
 )
 
-var validParameters = map[string]string{
-	"type":            "",
-	"running":         "",
-	"search":          "",
-	"lookup":          "",
-	"fingerprint":     "",
-	"country":         "",
-	"as":              "",
-	"flag":            "",
-	"first_seen_days": "",
-	"last_seen_days":  "",
-	"contact":         "",
-	"family":          "",
-	"fields":          "",
-	"order":           "",
-	"offset":          "",
-	"limit":           "",
+var validParameters = map[string]interface{}{
+	"type":            nil,
+	"running":         nil,
+	"search":          nil,
+	"lookup":          nil,
+	"fingerprint":     nil,
+	"country":         nil,
+	"as":              nil,
+	"flag":            nil,
+	"first_seen_days": nil,
+	"last_seen_days":  nil,
+	"contact":         nil,
+	"family":          nil,
+	"fields":          nil,
+	"order":           nil,
+	"offset":          nil,
+	"limit":           nil,
 }
 
-var validMethods = map[string]string{
-	"summary":   "",
-	"details":   "",
-	"bandwidth": "",
-	"weights":   "",
-	"clients":   "",
-	"uptime":    "",
+var validMethods = map[string]interface{}{
+	"summary":   nil,
+	"details":   nil,
+	"bandwidth": nil,
+	"weights":   nil,
+	"clients":   nil,
+	"uptime":    nil,
 }
 
 func validateQueryParameters(query map[string]string) error {
@@ -87,28 +87,40 @@ func constructQueryParametersString(query map[string]string) string {
 }
 
 func executeRequest(method string, query map[string]string, result interface{}) error {
-	if err := validateQueryParameters(query); err != nil {
+	var err error
+	if err = validateQueryParameters(query); err != nil {
 		return err
 	}
 
-	if err := validateMethod(method); err != nil {
+	if err = validateMethod(method); err != nil {
 		return err
 	}
 
 	requestURL := fmt.Sprintf("%s%s?%s", oooURL, method, constructQueryParametersString(query))
 
-	request, err := http.NewRequest("GET", requestURL, nil)
+	var request *http.Request
+	if request, err = http.NewRequest("GET", requestURL, nil); err != nil {
+		return err
+	}
+
 	request.Header.Add("Accept-Encoding", "gzip")
 
 	client := new(http.Client)
-	response, err := client.Do(request)
+
+	var response *http.Response
+	if response, err = client.Do(request); err != nil {
+		return err
+	}
 	defer response.Body.Close()
 
 	var reader io.ReadCloser
 	// Check we actually go a gzipped response
 	switch response.Header.Get("Content-Encoding") {
 	case "gzip":
-		reader, err = gzip.NewReader(response.Body)
+		if reader, err = gzip.NewReader(response.Body); err != nil {
+			return err
+		}
+
 		defer reader.Close()
 	default:
 		reader = response.Body

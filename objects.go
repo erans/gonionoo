@@ -27,7 +27,7 @@ type Summary struct {
 
 // RelayDetails document contains the detailed information about a relay
 type RelayDetails struct {
-	Nickname                 string              `json:"name"`
+	Nickname                 string              `json:"nickname"`
 	Fingerprint              string              `json:"fingerprint"`
 	OrAddresses              []string            `json:"or_addresses"`
 	ExitAddresses            []string            `json:"exit_addresses"`
@@ -40,6 +40,7 @@ type RelayDetails struct {
 	Flags                    []string            `json:"flags"`
 	Country                  string              `json:"country"`
 	CountryName              string              `json:"country_name"`
+	RegionName               string              `json:"region_name"`
 	CityName                 string              `json:"city_name"`
 	Latitude                 float64             `json:"latitude"`
 	Longitude                float64             `json:"longitude"`
@@ -58,7 +59,6 @@ type RelayDetails struct {
 	Contact                  string              `json:"contact"`
 	Platfrom                 string              `json:"platform"`
 	RecommendedVersion       bool                `json:"recommended_version"`
-	Family                   []string            `json:"family"`           // Deprected as of August 25, 2015
 	EffectiveFamily          []string            `json:"effective_family"` // Added on July 3, 2015
 	AllegedFamily            []string            `json:"alleged_family"`   // Added on August 25, 2015
 	IndirectFamily           []string            `json:"indirect_family"`  // Added on August 25, 2015
