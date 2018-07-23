@@ -4,11 +4,11 @@ import (
 	"testing"
 )
 
-var fingerprint = "E1E922A20AF608728824A620BADC6EFC8CB8C2B8"
+var fingerprint = "D5F2C65F4131A1468D5B67A8838A9B7ED8C049E2"
 var maxLimitForTest = "100"
 
 func TestGetSummaryNoQuery(t *testing.T) {
-	summary, err := GetSummary(nil)
+	summary, _, err := GetSummary(nil, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -19,16 +19,16 @@ func TestGetSummaryNoQuery(t *testing.T) {
 }
 
 func TestGetSummaryInvalidQueryParameter(t *testing.T) {
-	_, err := GetSummary(map[string]string{"invalidParameter": "invalidValue"})
+	_, _, err := GetSummary(map[string]string{"invalidParameter": "invalidValue"}, "")
 	if err == nil {
 		t.Error(err)
 	}
 }
 
 func TestGetSummaryWithFingerprintQueryParameter(t *testing.T) {
-	// We are using the fingerprint of TorLand1 (https://atlas.torproject.org/?#details/E1E922A20AF608728824A620BADC6EFC8CB8C2B8)
+	// We are using the fingerprint of che (https://metrics.torproject.org/rs.html#details/D5F2C65F4131A1468D5B67A8838A9B7ED8C049E2)
 	// a very solid running Tor node
-	summary, err := GetSummary(map[string]string{"fingerprint": fingerprint})
+	summary, _, err := GetSummary(map[string]string{"fingerprint": fingerprint}, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -47,7 +47,7 @@ func TestGetSummaryWithFingerprintQueryParameter(t *testing.T) {
 }
 
 func TestGetDetailsNoQuery(t *testing.T) {
-	details, err := GetDetails(map[string]string{"limit": maxLimitForTest})
+	details, _, err := GetDetails(map[string]string{"limit": maxLimitForTest}, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -62,7 +62,7 @@ func TestGetDetailsNoQuery(t *testing.T) {
 }
 
 func TestGetDetailsWithFingerprintQueryParameter(t *testing.T) {
-	details, err := GetDetails(map[string]string{"fingerprint": fingerprint})
+	details, _, err := GetDetails(map[string]string{"fingerprint": fingerprint}, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,7 +81,7 @@ func TestGetDetailsWithFingerprintQueryParameter(t *testing.T) {
 }
 
 func TestGetBandwidthWithFingerprintQueryParameter(t *testing.T) {
-	bandwidth, err := GetBandwidth(map[string]string{"fingerprint": fingerprint})
+	bandwidth, _, err := GetBandwidth(map[string]string{"fingerprint": fingerprint}, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -100,7 +100,7 @@ func TestGetBandwidthWithFingerprintQueryParameter(t *testing.T) {
 }
 
 func TestGetWeightsWithFingerprintQueryParameter(t *testing.T) {
-	weights, err := GetWeights(map[string]string{"fingerprint": fingerprint})
+	weights, _, err := GetWeights(map[string]string{"fingerprint": fingerprint}, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -119,7 +119,7 @@ func TestGetWeightsWithFingerprintQueryParameter(t *testing.T) {
 }
 
 func TestGetClientsNoQuery(t *testing.T) {
-	clients, err := GetClients(map[string]string{"limit": maxLimitForTest})
+	clients, _, err := GetClients(map[string]string{"limit": maxLimitForTest}, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -134,7 +134,7 @@ func TestGetClientsNoQuery(t *testing.T) {
 }
 
 func TestGetUptimeNoQuery(t *testing.T) {
-	uptime, err := GetUptime(map[string]string{"limit": maxLimitForTest})
+	uptime, _, err := GetUptime(map[string]string{"limit": maxLimitForTest}, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -164,7 +164,7 @@ func TestValidatMethodUnknownMethod(t *testing.T) {
 
 func TestExecuteRequestWithUnknownMethod(t *testing.T) {
 	var result = new(Uptime)
-	err := executeRequest("Unknown", nil, &result)
+	_, err := executeRequest("Unknown", nil, "", &result)
 	if err == nil {
 		t.Errorf("executeRequest with an unknown method didn't return an error")
 	}

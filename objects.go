@@ -48,6 +48,8 @@ type RelayDetails struct {
 	ASName                   string              `json:"as_name"`
 	ConsensusWeight          float64             `json:"consensus_weight"`
 	HostName                 string              `json:"host_name"`
+	VerifiedHostNames        []string            `json:"verified_host_names"`
+	UnverifiedHostNames      []string            `json:"unverified_host_names"`
 	LastRestarted            string              `json:"last_restarted"`
 	BandwidthRate            float64             `json:"bandwidth_rate"`
 	BandwidthBurst           float64             `json:"bandwidth_burst"`
@@ -58,7 +60,9 @@ type RelayDetails struct {
 	ExitPolicyV6Summary      map[string][]string `json:"exit_policy_v6_summary"`
 	Contact                  string              `json:"contact"`
 	Platfrom                 string              `json:"platform"`
+	Version                  string              `json:"string"`
 	RecommendedVersion       bool                `json:"recommended_version"`
+	VersionStatus            string              `json:"version_status"`   // Added on April 6, 2018
 	EffectiveFamily          []string            `json:"effective_family"` // Added on July 3, 2015
 	AllegedFamily            []string            `json:"alleged_family"`   // Added on August 25, 2015
 	IndirectFamily           []string            `json:"indirect_family"`  // Added on August 25, 2015
@@ -66,7 +70,8 @@ type RelayDetails struct {
 	GuardProbability         float64             `json:"guard_probability"`
 	MiddleProbability        float64             `json:"middle_probability"`
 	ExitProbability          float64             `json:"exit_probability"`
-	Measured                 bool                `json:"measured"` // Added on August 13, 2015
+	Measured                 bool                `json:"measured"`                 // Added on August 13, 2015
+	UnreachableOrAddresses   []string            `json:"unreachable_or_addresses"` // Added onNovember 17, 2017
 }
 
 // BridgeDetails document contains detailed information about a bridge
@@ -81,12 +86,16 @@ type BridgeDetails struct {
 	LastRestarted       string   `json:"last_restarted"`
 	AdvertisedBandwidth float64  `json:"advertised_bandwidth"`
 	Platform            string   `json:"platform"`
+	Version             string   `json:"version"`
+	RecommendedVersion  string   `json:"recommended_version"`
+	VersionStatus       string   `json:"version_status"`
 	Transports          []string `json:"transports"`
 }
 
 // Details documents are based on network statuses published by the Tor directories, server descriptors published by relays and bridges, and data published by Tor network services TorDNSEL and BridgeDB. Details documents use the most recently published data from these sources, which may lead to contradictions between fields based on different sources in rare edge cases.
 type Details struct {
 	Version                   string          `json:"version"`
+	BuildVersion              string          `json:"build_version"`
 	NextMajorVersionScheduled string          `json:"next_major_version_scheduled"`
 	RelaysPublished           string          `json:"relays_published"`
 	Relays                    []RelayDetails  `json:"relays"`
@@ -106,15 +115,12 @@ type GraphHistory struct {
 
 // GraphHistoryBeta is a new format in Beta that breaks that GraphHistory format. It has some additional fields
 type GraphHistoryBeta struct {
-	First      string             `json:"first"`
-	Last       string             `json:"last"`
-	Interval   int32              `json:"interval"`
-	Factor     float64            `json:"factor"`
-	Count      int32              `json:"count"`
-	Values     []int32            `json:"values"`
-	Countries  map[string]float64 `json:"countries"`
-	Transports map[string]float64 `json:"transports"`
-	Versions   map[string]float64 `json:"versions"`
+	First    string  `json:"first"`
+	Last     string  `json:"last"`
+	Interval int32   `json:"interval"`
+	Factor   float64 `json:"factor"`
+	Count    int32   `json:"count"`
+	Values   []int32 `json:"values"`
 }
 
 // RelayBandwidth object contains bandwidth historical data for a relay

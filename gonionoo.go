@@ -14,28 +14,30 @@ const (
 	// OOOURL is the OnionOO endpoint URL
 	oooURL = "https://onionoo.torproject.org/"
 	// OOOVersionMajor is the OnionOO major version
-	oooVersionMajor = 4
+	oooVersionMajor = 6
 	// OOOVersionMinor is the OnionOO minor version
-	oooVersionMinor = 0
+	oooVersionMinor = 1
 )
 
 var validParameters = map[string]interface{}{
-	"type":            nil,
-	"running":         nil,
-	"search":          nil,
-	"lookup":          nil,
-	"fingerprint":     nil,
-	"country":         nil,
-	"as":              nil,
-	"flag":            nil,
-	"first_seen_days": nil,
-	"last_seen_days":  nil,
-	"contact":         nil,
-	"family":          nil,
-	"fields":          nil,
-	"order":           nil,
-	"offset":          nil,
-	"limit":           nil,
+	"type":                nil,
+	"running":             nil,
+	"search":              nil,
+	"lookup":              nil,
+	"fingerprint":         nil,
+	"country":             nil,
+	"as":                  nil,
+	"flag":                nil,
+	"first_seen_days":     nil,
+	"last_seen_days":      nil,
+	"contact":             nil,
+	"family":              nil,
+	"fields":              nil,
+	"order":               nil,
+	"offset":              nil,
+	"limit":               nil,
+	"host_name":           nil,
+	"recommended_version": nil,
 }
 
 var validMethods = map[string]interface{}{
@@ -86,30 +88,34 @@ func constructQueryParametersString(query map[string]string) string {
 	return buffer.String()
 }
 
-func executeRequest(method string, query map[string]string, result interface{}) error {
+func executeRequest(method string, query map[string]string, lastModifiedSince string, result interface{}) (string, error) {
 	var err error
 	if err = validateQueryParameters(query); err != nil {
-		return err
+		return "", err
 	}
 
 	if err = validateMethod(method); err != nil {
-		return err
+		return "", err
 	}
 
 	requestURL := fmt.Sprintf("%s%s?%s", oooURL, method, constructQueryParametersString(query))
 
 	var request *http.Request
 	if request, err = http.NewRequest("GET", requestURL, nil); err != nil {
-		return err
+		return "", err
 	}
 
 	request.Header.Add("Accept-Encoding", "gzip")
+
+	if lastModifiedSince != "" {
+		request.Header.Add("If-Modified-Since", lastModifiedSince)
+	}
 
 	client := new(http.Client)
 
 	var response *http.Response
 	if response, err = client.Do(request); err != nil {
-		return err
+		return "", err
 	}
 	defer response.Body.Close()
 
@@ -118,7 +124,7 @@ func executeRequest(method string, query map[string]string, result interface{}) 
 	switch response.Header.Get("Content-Encoding") {
 	case "gzip":
 		if reader, err = gzip.NewReader(response.Body); err != nil {
-			return err
+			return "", err
 		}
 
 		defer reader.Close()
@@ -128,79 +134,79 @@ func executeRequest(method string, query map[string]string, result interface{}) 
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return response.Header.Get("Last-Modified"), nil
 }
 
 // GetSummary returns a summary of the requested relays and bridges
-func GetSummary(query map[string]string) (*Summary, error) {
+func GetSummary(query map[string]string, lastModifiedSince string) (*Summary, string, error) {
 	summary := new(Summary)
 
-	if err := executeRequest("summary", query, &summary); err != nil {
-		return nil, err
+	if lastModified, err := executeRequest("summary", query, lastModifiedSince, &summary); err != nil {
+		return nil, "", err
+	} else {
+		return summary, lastModified, nil
 	}
-
-	return summary, nil
 }
 
 // GetDetails returns detailed data of the requested relays and/or bridges
-func GetDetails(query map[string]string) (*Details, error) {
+func GetDetails(query map[string]string, lastModifiedSince string) (*Details, string, error) {
 	details := new(Details)
 
-	if err := executeRequest("details", query, &details); err != nil {
-		return nil, err
+	if lastModified, err := executeRequest("details", query, lastModifiedSince, &details); err != nil {
+		return nil, "", err
+	} else {
+		return details, lastModified, nil
 	}
-
-	return details, nil
 }
 
 // GetBandwidth returns details bandwidth data for the requested relays/bridges
-func GetBandwidth(query map[string]string) (*Bandwidth, error) {
+func GetBandwidth(query map[string]string, lastModifiedSince string) (*Bandwidth, string, error) {
 	bandwidth := new(Bandwidth)
 
-	if err := executeRequest("bandwidth", query, &bandwidth); err != nil {
-		return nil, err
+	if lastModified, err := executeRequest("bandwidth", query, lastModifiedSince, &bandwidth); err != nil {
+		return nil, "", err
+	} else {
+		return bandwidth, lastModified, nil
 	}
-
-	return bandwidth, nil
 }
 
 // GetWeights returns weights data for the requested relays/bridges
-func GetWeights(query map[string]string) (*Weights, error) {
+func GetWeights(query map[string]string, lastModifiedSince string) (*Weights, string, error) {
 	weights := new(Weights)
 
-	if err := executeRequest("weights", query, &weights); err != nil {
-		return nil, err
+	if lastModified, err := executeRequest("weights", query, lastModifiedSince, &weights); err != nil {
+		return nil, "", err
+	} else {
+		return weights, lastModified, nil
 	}
-
-	return weights, nil
 }
 
 // GetClients returns clients data for the requested relays/bridges
-func GetClients(query map[string]string) (*Clients, error) {
+func GetClients(query map[string]string, lastModifiedSince string) (*Clients, string, error) {
 	clients := new(Clients)
 
-	if err := executeRequest("clients", query, &clients); err != nil {
-		return nil, err
+	if lastModified, err := executeRequest("clients", query, lastModifiedSince, &clients); err != nil {
+		return nil, "", err
+	} else {
+		return clients, lastModified, nil
 	}
-
-	return clients, nil
 }
 
 // GetUptime returns uptime data for the requested relays/bridges
-func GetUptime(query map[string]string) (*Uptime, error) {
+func GetUptime(query map[string]string, lastModifiedSince string) (*Uptime, string, error) {
 	uptime := new(Uptime)
 
-	if err := executeRequest("uptime", query, &uptime); err != nil {
-		return nil, err
+	if lastModified, err := executeRequest("uptime", query, lastModifiedSince, &uptime); err != nil {
+		return nil, "", err
+	} else {
+		return uptime, lastModified, nil
 	}
-
-	return uptime, nil
 }
