@@ -3,7 +3,7 @@ Go wrapper for Onionoo - Tor network status protocol (https://onionoo.torproject
 
 Written by Eran Sandler (@erans) http://eran.sandler.co.il
 
-Supports v4.0 of the Onionoo protocol. Read more about the protocol [here](https://onionoo.torproject.org/).
+Supports v6.1 of the Onionoo protocol. Read more about the protocol [here](https://metrics.torproject.org/onionoo.html#versions_4_1).
 
 # License
 See [LICENSE](https://github.com/erans/gonionoo/blob/master/LICENSE)
